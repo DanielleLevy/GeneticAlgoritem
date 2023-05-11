@@ -1,13 +1,12 @@
-import math
 import random
 import string
-
+import matplotlib.pyplot as plt
+import tkinter as tk
 # Parameters
 POPULATION_SIZE = 100
-ELITISM_RATIO = 0.1
 CROSSOVER_RATE = 0.8
 MUTATION_RATE = 0.1
-MAX_GENERATIONS = 1000
+MAX_GENERATIONS = 100
 score_calls = 0
 
 
@@ -35,6 +34,87 @@ PERMUTATION_SIZE = len(ALPHABET)
 INITIAL_PERMUTATION = list(ALPHABET)
 random.shuffle(INITIAL_PERMUTATION)
 
+# Create a window
+window = tk.Tk()
+window.title("Genetic Algorithm Parameters")
+window.geometry("300x200")
+
+# Create labels and entry widgets for each parameter
+pop_size_label = tk.Label(window, text="Population size:")
+pop_size_label.pack()
+pop_size_entry = tk.Entry(window)
+pop_size_entry.insert(0, "100")
+pop_size_entry.pack()
+
+crossover_rate_label = tk.Label(window, text="Crossover rate:")
+crossover_rate_label.pack()
+crossover_rate_entry = tk.Entry(window)
+crossover_rate_entry.insert(0, "0.8")
+crossover_rate_entry.pack()
+
+mutation_rate_label = tk.Label(window, text="Mutation rate:")
+mutation_rate_label.pack()
+mutation_rate_entry = tk.Entry(window)
+mutation_rate_entry.insert(0, "0.1")
+mutation_rate_entry.pack()
+
+max_generations_label = tk.Label(window, text="Max generations:")
+max_generations_label.pack()
+max_generations_entry = tk.Entry(window)
+max_generations_entry.insert(0, "100")
+max_generations_entry.pack()
+
+
+def input_check(population_size, crossover_rate, mutation_rate, max_generations):
+    # check population_size
+    try:
+        population_size = int(population_size)
+        crossover_rate=float(crossover_rate)
+        mutation_rate=float(mutation_rate)
+        max_generations=int(max_generations)
+    except:
+        return False
+
+    if population_size <= 0:
+        return False
+
+    # check crossover_rate
+    if crossover_rate < 0 or crossover_rate > 1:
+        return False
+
+    # check mutation_rate
+    if mutation_rate < 0 or mutation_rate > 1:
+        return False
+
+    # check max_generations
+    if max_generations <= 0:
+        return False
+
+    return True
+
+
+# Define a function to get the parameter values from the entry widgets
+def get_params():
+    pop_size = pop_size_entry.get()
+    crossover_rate = crossover_rate_entry.get()
+    mutation_rate = mutation_rate_entry.get()
+    max_generations = max_generations_entry.get()
+    if input_check(pop_size,crossover_rate,mutation_rate,max_generations):
+        pop_size = int(pop_size)
+        crossover_rate = float(crossover_rate)
+        mutation_rate = float(mutation_rate)
+        max_generations = int(max_generations)
+    else:
+        pop_size = POPULATION_SIZE
+        crossover_rate = CROSSOVER_RATE
+        mutation_rate = MUTATION_RATE
+        max_generations=MAX_GENERATIONS
+    window.destroy()
+    run_genetic_algorithm(pop_size,crossover_rate,mutation_rate,max_generations)
+
+
+
+
 
 def fitness_score(candidate):
     """
@@ -43,7 +123,10 @@ def fitness_score(candidate):
     """
     # Convert INITIAL_PERMUTATION to a string before using it in str.maketrans()
     initial_permutation_str = ''.join(INITIAL_PERMUTATION)
-    candidate_str = ''.join(candidate)
+    try:
+        candidate_str = ''.join(candidate)
+    except:
+        print("")
     # Build substitution table
     table = str.maketrans(initial_permutation_str, candidate_str)
 
@@ -141,20 +224,25 @@ def mutate(candidate):
     """
     pos1, pos2 = random.sample(range(PERMUTATION_SIZE), 2)
     candidate[pos1], candidate[pos2] = candidate[pos2], candidate[pos1]
+    return candidate
 
 def calc_score(population):
     global score_calls
     score_calls += 1
     fitness_scores = []
     sumFintnesScore = 0
+    worst_score = float('inf')
     # Compute fitness scores
     for individual in population:
         score = fitness_score(individual)
         fitness_scores.append(score)
         sumFintnesScore += score
-    avg_score=sumFintnesScore/len(population)
-    return fitness_scores,sumFintnesScore,avg_score
-def evolve_population(population,fitness_scores,sumFintnesScore):
+        if score < worst_score:
+            worst_score = score
+    avg_score = sumFintnesScore / len(population)
+    return fitness_scores, sumFintnesScore, avg_score, worst_score
+
+def evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,mutation_rate):
     """
     Evolves the given population by applying selection, crossover, and mutation operators.
 
@@ -178,7 +266,7 @@ def evolve_population(population,fitness_scores,sumFintnesScore):
 
 
     # Perform crossover
-    num_offspring = int(len(population) * CROSSOVER_RATE)
+    num_offspring = int(len(population) * crossover_rate)
     offspring = []
     for i in range(num_offspring):
         # Choose two random elements from the vector, ensuring they are distinct
@@ -191,7 +279,7 @@ def evolve_population(population,fitness_scores,sumFintnesScore):
         offspring.append(child)
 
     # Perform mutation
-    num_mutants = int((len(population)  * MUTATION_RATE))
+    num_mutants = int((len(population)  * mutation_rate))
     mutants = []
     for i in range(num_mutants):
         parent = random.choice(population)
@@ -215,17 +303,56 @@ def cut_population(population, fitness_scores):
 
     return new_population
 
+def run_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_generations):
+    # Generate initial population
+    generations=[]
+    avg_scores = []  # replace with actual average scores for each generation
+    bad_scores = []  # replace with actual bad scores for each generation
+    population = generate_initial_population(population_size)
+    # Evolve population
+    for generation in range(max_generations):
+        fitness_scores, sumFintnesScore, avg_score,worst_score = calc_score(population)
+        generations.append(generation)
+        avg_scores.append(avg_score)
+        bad_scores.append(worst_score)
+        # Apply selection, crossover, and mutation operators to population
+        population = evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,mutation_rate)
+        fitness_scores, sumFintnesScore, avg_score,worst_score = calc_score(population)
+        population=cut_population(population,fitness_scores)
 
-# Generate initial population
-population = generate_initial_population(POPULATION_SIZE)
-fitness_scores,sumFintnesScore,avg_score=calc_score(population)
-
-# Evolve population
-for generation in range(MAX_GENERATIONS):
-    # Apply selection, crossover, and mutation operators to population
-    population = evolve_population(population,fitness_scores,sumFintnesScore)
-    fitness_scores, sumFintnesScore, avg_score = calc_score(population)
-    population=cut_population(population,fitness_scores)
 
 
-print('Finished')
+    # Create a figure and axis object
+    fig, ax = plt.subplots()
+
+    # Set the title and axis labels
+    ax.set_title("Average and Bad Scores by Generation")
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Score")
+
+    # Set the bar width
+    bar_width = 0.35
+
+    # Plot the average scores as a blue bar
+    ax.bar(generations, avg_scores, color='b', width=bar_width, label='Average Scores')
+
+    # Plot the bad scores as a red bar
+    ax.bar([g + bar_width for g in generations], bad_scores, color='r', width=bar_width, label='Bad Scores')
+
+    # Add a legend
+    ax.legend()
+
+    # Display the chart
+    plt.show()
+
+
+def main():
+    # create the button widget and add it to the window
+    button = tk.Button(window, text="Run Genetic Algorithm", command=get_params)
+    button.pack()
+
+    # Start the window
+    window.mainloop()
+
+if __name__ == '__main__':
+    main()
