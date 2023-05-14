@@ -109,24 +109,34 @@ def get_params():
         crossover_rate = CROSSOVER_RATE
         mutation_rate = MUTATION_RATE
         max_generations=MAX_GENERATIONS
-    window.destroy()
-    run_genetic_algorithm(pop_size,crossover_rate,mutation_rate,max_generations)
+    return pop_size,crossover_rate,mutation_rate,max_generations
 
 
 
+def chosen_sol(population,fitness_scores):
+    # Sort the population indices by their fitness scores
+    sorted_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)
+    solution=population[sorted_indices[0]]
+    best_f=fitness_scores[sorted_indices[0]]
 
+    return solution,best_f
+def encode_txt(solution):
+    initial_permutation_str = ''.join(INITIAL_PERMUTATION)
+    # Build substitution table
+    table = str.maketrans(initial_permutation_str, ''.join(solution))
+    # Decode text with substitution table
+    decoded_text = CIPHER_TEXT.translate(table)
+    perm_dict = {INITIAL_PERMUTATION[i]: solution[i] for i in range(len(INITIAL_PERMUTATION))}
+    sorted_perm_dict = dict(sorted(perm_dict.items()))
+    return decoded_text,sorted_perm_dict
 
 def fitness_score(candidate):
-    """
-    Compute the fitness score for a given candidate permutation.
-    The score is the sum of the log-probabilities of the English letter and letter pair frequencies in the decoded text.
-    """
+    global score_calls
+    score_calls += 1
     # Convert INITIAL_PERMUTATION to a string before using it in str.maketrans()
     initial_permutation_str = ''.join(INITIAL_PERMUTATION)
-    try:
-        candidate_str = ''.join(candidate)
-    except:
-        print("")
+    candidate_str = ''.join(candidate)
+
     # Build substitution table
     table = str.maketrans(initial_permutation_str, candidate_str)
 
@@ -164,9 +174,6 @@ def fitness_score(candidate):
 
 
 def generate_initial_population(size):
-    """
-    Generate a random initial population of permutations of the alphabet.
-    """
     population = []
     for i in range(size):
         perm = list(INITIAL_PERMUTATION)
@@ -174,20 +181,7 @@ def generate_initial_population(size):
         population.append(perm)
     return population
 
-
-def select_parents(population):
-    """
-    Select two parents from the population using tournament selection.
-    """
-    candidates = random.sample(population, 5)
-    candidates.sort(key=lambda x: fitness_score(x), reverse=True)
-    return candidates[0], candidates[1]
-
-
 def crossover(parent1, parent2):
-    """
-    Perform crossover between two parents to produce two offspring.
-    """
 
     crossover_point = random.randint(1, PERMUTATION_SIZE - 2)
 
@@ -219,16 +213,11 @@ def crossover(parent1, parent2):
 
 
 def mutate(candidate):
-    """
-    Mutate a candidate permutation by swapping two random elements.
-    """
     pos1, pos2 = random.sample(range(PERMUTATION_SIZE), 2)
     candidate[pos1], candidate[pos2] = candidate[pos2], candidate[pos1]
     return candidate
 
 def calc_score(population):
-    global score_calls
-    score_calls += 1
     fitness_scores = []
     sumFintnesScore = 0
     worst_score = float('inf')
@@ -240,18 +229,11 @@ def calc_score(population):
         if score < worst_score:
             worst_score = score
     avg_score = sumFintnesScore / len(population)
-    return fitness_scores, sumFintnesScore, avg_score, worst_score
+    best_score=max(fitness_scores)
+    return fitness_scores, sumFintnesScore, avg_score, worst_score,best_score
 
 def evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,mutation_rate):
-    """
-    Evolves the given population by applying selection, crossover, and mutation operators.
 
-    Args:
-        population (list): A list of individuals in the population.
-
-    Returns:
-        list: The new population after applying selection, crossover, and mutation operators.
-    """
     # Compute relative fitness scores
     relative_fitness_scores = []
     for score in fitness_scores:
@@ -300,59 +282,202 @@ def cut_population(population, fitness_scores):
 
     # Create a new population containing only the top individuals
     new_population = [population[i] for i in top_indices]
+    fitness_scores=[fitness_scores[i] for i in top_indices]
 
-    return new_population
+    return new_population,fitness_scores
 
-def run_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_generations):
+def run_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_generations,isfirst=0):
+    global score_calls
+    score_calls=0
+    convergence=0
     # Generate initial population
     generations=[]
     avg_scores = []  # replace with actual average scores for each generation
     bad_scores = []  # replace with actual bad scores for each generation
+    best_scores=[]
     population = generate_initial_population(population_size)
     # Evolve population
     for generation in range(max_generations):
-        fitness_scores, sumFintnesScore, avg_score,worst_score = calc_score(population)
+        fitness_scores, sumFintnesScore, avg_score,worst_score,best_score = calc_score(population)
         generations.append(generation)
         avg_scores.append(avg_score)
         bad_scores.append(worst_score)
+        best_scores.append(best_score)
         # Apply selection, crossover, and mutation operators to population
         population = evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,mutation_rate)
-        fitness_scores, sumFintnesScore, avg_score,worst_score = calc_score(population)
-        population=cut_population(population,fitness_scores)
+        fitness_scores, sumFintnesScore, avg_score,worst_score,best_score = calc_score(population)
+        population,fitness_scores=cut_population(population,fitness_scores)
+        if abs(avg_score-avg_scores[-1]) <= 1:
+            convergence += 1
+        else:
+            convergence=0
+        if convergence == 10:
+            sol, fitness = chosen_sol(population, fitness_scores)
+            return True, sol, fitness, generations, avg_scores, bad_scores,best_scores,score_calls
+    sol, fitness = chosen_sol(population, fitness_scores)
+    if(isfirst==1):
+        graph_and_txt(sol,generations,avg_scores,bad_scores,best_scores,population_size,crossover_rate,mutation_rate,max_generations,score_calls)
+    return False, sol, fitness, generations, avg_scores, bad_scores,best_scores,score_calls
 
 
+
+
+def graph_and_txt(sol, generations, avg_scores, bad_scores, best_scores, pop_size, crossover_rate, mutation_rate, max_generations,score_call):
+    # Create the text files containing the plaintext and permutation
+    plain, perm = encode_txt(sol)
+    with open("plain.txt", "w") as file:
+        file.write(plain)
+    with open("perm.txt", "w") as file:
+        for char in perm:
+            file.write(f"{char}: {perm[char]}\n")
 
     # Create a figure and axis object
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots( figsize=(14, 6))
 
-    # Set the title and axis labels
-    ax.set_title("Average and Bad Scores by Generation")
+    # Set the axis labels and title for the score distribution plot
     ax.set_xlabel("Generation")
     ax.set_ylabel("Score")
+    ax.set_title("Average, Bad, and Best Scores by Generation")
 
     # Set the bar width
     bar_width = 0.35
 
     # Plot the average scores as a blue bar
-    ax.bar(generations, avg_scores, color='b', width=bar_width, label='Average Scores')
+    ax.bar(generations, avg_scores, color='#5DA5DA', width=bar_width, label='Average Scores')
 
     # Plot the bad scores as a red bar
-    ax.bar([g + bar_width for g in generations], bad_scores, color='r', width=bar_width, label='Bad Scores')
+    ax.bar([g + bar_width for g in generations], bad_scores, color='#FAA43A', width=bar_width, label='Bad Scores')
 
-    # Add a legend
+    # Add a line plot of the best scores over time
+    ax.plot(generations, best_scores, color='#60BD68', linewidth=2, label='Best Scores')
+
+    # Add the parameters as text above the title
+    plt.text(0.5, 1.1, f"Population size: {pop_size}   Crossover rate: {crossover_rate}   Mutation rate: {mutation_rate}   Max generations: {max_generations}   Fitness function's calls: {score_calls}", ha='center', va='bottom', transform=ax.transAxes)
+    # Add a legend to the score distribution plot
     ax.legend()
 
-    # Display the chart
+    # Save the figure as a PNG file
+    plt.savefig("convergence_plot.png")
+
+    # Show the figure
     plt.show()
 
 
-def main():
-    # create the button widget and add it to the window
-    button = tk.Button(window, text="Run Genetic Algorithm", command=get_params)
-    button.pack()
+def run_genetic_algorithm_wrapper_to_check_conv(checkparam=0,pop_size=0 ,crossover_rate=0, mutation_rate=0, max_generations=0):
+    if(checkparam==0):
+        pop_size, crossover_rate, mutation_rate, max_generations=get_params()
+        window.destroy()
+    flag, sol, fitness, generations, avg_scores, worst_score ,best_scores,score_call= run_genetic_algorithm(pop_size, crossover_rate, mutation_rate, max_generations,1)
+    best_fitness_scores=[]
+    solutions=[]
+    generations_conv=[]
+    avg_scores_conv=[]
+    bad_scores=[]
+    best_scores_conv=[]
+    score_calls_conv=[]
+    mutation_rates=[]
+    if(flag==True):
+        for i in range(5):
+            best_fitness_scores.append(fitness)
+            solutions.append(sol)
+            generations_conv.append(generations)
+            avg_scores_conv.append(avg_scores)
+            bad_scores.append(worst_score)
+            best_scores_conv.append(best_scores)
+            mutation_rates.append(mutation_rate)
+            score_calls_conv.append(score_call)
+            mutation_rate=random.uniform(mutation_rate, 1)
+            flag, sol, fitness, generations, avg_scores, worst_score,best_scores,score_call = run_genetic_algorithm(pop_size, crossover_rate,
+                                                                                   mutation_rate, max_generations)
+        max_index = best_fitness_scores.index(max(best_fitness_scores))
+        graph_and_txt(solutions[max_index],generations_conv[max_index],avg_scores_conv[max_index],bad_scores[max_index],best_scores_conv[max_index],pop_size,crossover_rate,mutation_rates[max_index],generations_conv[max_index][-1],score_calls_conv[max_index])
+        if(checkparam == 1):
+            return avg_scores_conv[max_index], bad_scores[max_index], best_scores_conv[max_index],score_calls_conv[max_index]
 
-    # Start the window
+
+
+
+def compare():
+    max_gen =[50,80,100,150,200]
+    crossover_rate = 0.8
+    mutation_rate = 0.1
+    pop_size = 100
+    best_fitness_scores = []
+    avg_scores = []
+    bad_scores = []
+    score_calls = []
+
+
+
+    for i, param in enumerate(max_gen):
+        avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(1, pop_size, crossover_rate, mutation_rate,
+                                                                                 param)
+        best_fitness_scores.append(best)
+        avg_scores.append(avg)
+        bad_scores.append(bad)
+        score_calls.append(score_call)
+    plot_results(max_gen, best_fitness_scores, avg_scores, bad_scores, score_calls)
+
+
+def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, score_calls):
+    fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+    axs = axs.flatten()
+
+    colors = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'orange', 'gray']
+    handles = []
+
+    # Plot best fitness scores
+    ax = axs[0]
+    for i, param in enumerate(crossover_param):
+        line, = ax.plot(best_fitness_scores[i], label=f'max generations: {param}', color=colors[i])
+        handles.append(line)
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Best fitness score')
+    ax.set_title('Best fitness score')
+
+    # Plot average fitness scores
+    ax = axs[1]
+    for i, param in enumerate(crossover_param):
+        line, = ax.plot(avg_scores[i], label=f'max generations: {param}', color=colors[i])
+        handles.append(line)
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Average fitness score')
+    ax.set_title('Average fitness score')
+
+    # Plot worst fitness scores
+    ax = axs[2]
+    for i, param in enumerate(crossover_param):
+        line, = ax.plot(bad_scores[i], label=f'max generations: {param}', color=colors[i])
+        handles.append(line)
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Worst fitness score')
+    ax.set_title('Worst fitness score')
+
+    # Plot number of score calls
+    ax = axs[3]
+    for i, param in enumerate(crossover_param):
+        bar = ax.bar(x=range(len(score_calls)), height=score_calls[i], label=f'max generations: {param}', color=colors[i])
+        handles.append(bar)
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Score calls')
+    ax.set_title('Number of score calls')
+
+    fig.legend(handles=handles, labels=[f'max generations: {param}' for param in crossover_param], loc='center left')
+
+    plt.subplots_adjust(left=0.2, wspace=0.3, hspace=0.4)
+    plt.tight_layout()
+    plt.show()
+
+
+
+def main():
+     #compare()
+    button = tk.Button(window, text="Run Genetic Algorithm",
+                       command=lambda: run_genetic_algorithm_wrapper_to_check_conv())
+    button.pack()
     window.mainloop()
+
+
 
 if __name__ == '__main__':
     main()
