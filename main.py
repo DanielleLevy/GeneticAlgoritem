@@ -516,7 +516,7 @@ def compare():
     plot_results(tags, best_fitness_scores, avg_scores, bad_scores, score_calls)
 
 
-def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, score_calls):
+def plot_results(param, best_fitness_scores, avg_scores, bad_scores, score_calls):
     fig, axs = plt.subplots(2, 2, figsize=(16, 12))
     axs = axs.flatten()
 
@@ -525,7 +525,7 @@ def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, s
 
     # Plot best fitness scores
     ax = axs[0]
-    for i, param in enumerate(crossover_param):
+    for i, param in enumerate(param):
         line, = ax.plot(best_fitness_scores[i], label=f' {param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
@@ -534,7 +534,7 @@ def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, s
 
     # Plot average fitness scores
     ax = axs[1]
-    for i, param in enumerate(crossover_param):
+    for i, param in enumerate(param):
         line, = ax.plot(avg_scores[i], label=f' {param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
@@ -543,7 +543,7 @@ def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, s
 
     # Plot worst fitness scores
     ax = axs[2]
-    for i, param in enumerate(crossover_param):
+    for i, param in enumerate(param):
         line, = ax.plot(bad_scores[i], label=f'{param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
@@ -561,7 +561,7 @@ def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, s
     ax.set_ylabel('Number of score calls')
     ax.set_title('Number of score calls')
 
-    fig.legend(handles=handles, labels=[f' {param}' for param in crossover_param], loc='center left')
+    fig.legend(handles=handles, labels=[f' {param}' for param in param], loc='center left')
 
     plt.subplots_adjust(left=0.2, wspace=0.3, hspace=0.4)
     plt.tight_layout()
