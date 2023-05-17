@@ -19,6 +19,13 @@ The algorithm will run for the specified number of generations or until converge
 The algorithm will output the decrypted plaintext, the best permutation, and generate a plot (plot.png) showing the average, bad, and best scores over generations. The decrypted plaintext will be saved in plain.txt, and the permutation will be saved in perm.txt.
 You can check the convergence and the number of fitness function calls in the console output.
 
+## Output
+1. Graph (plot.png): The code generates a graph that displays the average, best, and worst fitness scores for each generation. This graph provides a visual representation of the fitness scores over the course of the evolutionary process. Additionally, the graph includes the parameters used for the run and the number of function calls. The graph is saved in the code directory upon completion of the execution under the name "plot.png."
+
+2. Plain text file (plain.txt): A plain text file named "plain.txt" is created in the code directory. This file contains the decoded text. It represents the output of the code after it has been processed and transformed into human-readable text.
+
+3. Permutation table file (perm.txt): Another file named "perm.txt" is created in the code directory. This file contains the permutation table, which is a table that indicates the substitutions made during the execution of the code. It provides information about the changes or replacements that occurred during the execution process.
+
 ## Notes
 The genetic algorithm uses a fitness function to evaluate the quality of each candidate solution. The fitness function computes the log-probabilities of English letter and letter pair frequencies in the decrypted text, and also adds a bonus for each English word found.
 The genetic_algorithm.py script includes the necessary functions to perform selection, crossover, mutation, and fitness scoring. You can modify these functions or experiment with different variations of the genetic algorithm as needed.
