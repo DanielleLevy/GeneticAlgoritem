@@ -40,6 +40,12 @@ INITIAL_PERMUTATION = list(ALPHABET)
 random.shuffle(INITIAL_PERMUTATION)
 
 def update_checkboxes():
+    """
+The update_checkboxes function is called when either the Darwinian or Lamarckian checkbox is selected.
+It ensures that only one of the two checkboxes can be selected at a time.
+
+:return: Nothing
+"""
     if darwinian_var.get() == 1:
         lamarckian_checkbox.deselect()
     if lamarckian_var.get() == 1:
@@ -87,7 +93,19 @@ lamarckian_checkbox.pack()
 
 
 def input_check(population_size, crossover_rate, mutation_rate, max_generations):
-    # check population_size
+    """
+The input_check function checks the validity of the user input.
+    It takes in four parameters: population_size, crossover_rate, mutation_rate and max_generations.
+    The function first checks if all inputs are integers or floats by using try-except statement. If any of them is not an integer or float, it returns False immediately. 
+    Then it checks if population size is positive and max generations is positive by checking whether they are greater than 0 respectively. 
+    Finally it checkes whether crossover rate and mutation rate are between 0 to 1 (inclusive) by checking whether they are less than 1 and greater
+
+:param population_size: Specify the size of the population
+:param crossover_rate: Determine the probability of a crossover occurring
+:param mutation_rate: Determine the probability of a mutation occuring
+:param max_generations: Determine the number of generations that will be run
+:return: True if all the inputs are valid, and false otherwise
+"""
     try:
         population_size = int(population_size)
         crossover_rate=float(crossover_rate)
@@ -115,6 +133,13 @@ def input_check(population_size, crossover_rate, mutation_rate, max_generations)
 
 
 def get_params():
+    """
+The get_params function is used to retrieve the parameters entered by the user in the GUI.
+If no values are entered, default values are returned.
+The function returns a tuple of 6 elements: pop_size, crossover_rate, mutation_rate and max_generations as integers; darwinian mode and lamarckian mode as booleans.
+
+:return: The parameters entered by the user
+"""
     pop_size = pop_size_entry.get()
     crossover_rate = crossover_rate_entry.get()
     mutation_rate = mutation_rate_entry.get()
@@ -135,6 +160,14 @@ def get_params():
 
 
 def generate_initial_population(size):
+    """
+The generate_initial_population function takes a single argument, size, which is the number of permutations to generate.
+It returns a list of lists (a 2D array) where each inner list represents one permutation. The length of the outer list
+is equal to size and each inner list has length len(INITIAL_PERMUTATION). Each element in an inner list is an integer from 0-9.
+
+:param size: Determine the size of the population
+:return: A list of size 'size'
+"""
     population = []
     for i in range(size):
         perm = list(INITIAL_PERMUTATION)
@@ -143,6 +176,13 @@ def generate_initial_population(size):
     return population
 
 def fitness_score(candidate):
+    """
+The fitness_score function takes a candidate solution and returns its fitness score.
+The fitness score is the number of English words in the decoded text, plus half a point for each letter or letter pair that has an English frequency within 0.01 of its true value.
+
+:param candidate: Pass the candidate permutation to the fitness_score function
+:return: The number of english words in the decoded text
+"""
     global score_calls
     score_calls += 1
     # Convert INITIAL_PERMUTATION to a string before using it in str.maketrans()
@@ -185,7 +225,16 @@ def fitness_score(candidate):
     return score
 
 def crossover(parent1, parent2):
+    """
+The crossover function takes two parents and returns an offspring.
+    The crossover function performs a one-point crossover on the parents,
+    returning the offspring. If there are duplicate letters in the offspring,
+    they are replaced with unused letters from ALPHABET.
 
+:param parent1: Pass in the parent that is being mutated
+:param parent2: Create the offspring2
+:return: A new individual, which is the result of
+"""
     crossover_point = random.randint(1, PERMUTATION_SIZE - 2)
 
     # Perform one-point crossover
@@ -216,6 +265,14 @@ def crossover(parent1, parent2):
 
 
 def mutate(candidate):
+    """
+The mutate function takes a candidate solution as input and returns a candidate solution with one of its
+elements randomly swapped with another. This function helps maintain genetic diversity in the population by
+preventing the algorithm from getting stuck at local optima.
+
+:param candidate: Pass the candidate to be mutated
+:return: A new candidate
+"""
     mutated_candidate = candidate.copy()  # Create a copy of the candidate
     pos1, pos2 = random.sample(range(len(candidate)), 2)
     mutated_candidate[pos1], mutated_candidate[pos2] = mutated_candidate[pos2], mutated_candidate[pos1]
@@ -223,6 +280,14 @@ def mutate(candidate):
 
 
 def calc_score(population):
+    """
+The calc_score function takes in a population and returns the fitness scores, sum of fitness scores, average score, worst score and best score.
+    Args:
+        population (list): A list of individuals.
+
+:param population: Pass in the population of individuals
+:return: The fitness scores, sum of the fitness scores, average score and worst score
+"""
     fitness_scores = []
     sumFintnesScore = 0
     worst_score = float('inf')
@@ -238,8 +303,20 @@ def calc_score(population):
     return fitness_scores, sumFintnesScore, avg_score, worst_score,best_score
 
 def evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,mutation_rate,darwinOrLamrk=0):
+    """
+The evolve_population function takes in a population, fitness scores, crossover rate and mutation rate.
+It then computes the relative fitness scores for each individual in the population. It then creates a vector of indices
+that is shuffled to randomize it. The function then performs crossover on num_offspring individuals from this vector and 
+performs mutation on num_mutants individuals from this vector.
 
-    # Compute relative fitness scores
+:param population: Pass in the current population of chromosomes
+:param fitness_scores: Compute the relative fitness scores
+:param sumFintnesScore: Compute the relative fitness scores
+:param crossover_rate: Determine the number of offspring that will be created
+:param mutation_rate: Determine how many members of the population will be mutated
+:param darwinOrLamrk: Determine whether to use the darwinian or lamarckian approach
+:return: A new population, but we need to
+"""
     relative_fitness_scores = []
     for score in fitness_scores:
         relative_fitness_score = score / sumFintnesScore
@@ -280,7 +357,15 @@ def evolve_population(population,fitness_scores,sumFintnesScore,crossover_rate,m
 
 
 def cut_population(population, fitness_scores):
-    # Sort the population indices by their fitness scores
+    """
+The cut_population function takes in a population and fitness scores, sorts the indices of the
+fitness_scores list from highest to lowest, then creates a new population containing only the top 100 individuals.
+It returns this new population and its corresponding fitness scores.
+
+:param population: Store the population of individuals
+:param fitness_scores: Sort the population by fitness
+:return: The top 100 individuals from the population
+"""
     sorted_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)
 
     # Keep only the top 100 indices
@@ -293,13 +378,29 @@ def cut_population(population, fitness_scores):
     return new_population,fitness_scores
 
 def chosen_sol(population,fitness_scores):
-    # Sort the population indices by their fitness scores
+    """
+The chosen_sol function takes in the population and fitness scores of that population.
+It then sorts the indices of the fitness scores from highest to lowest, and returns 
+the solution with the highest score as well as its corresponding score.
+
+:param population: Pass the population of solutions to the function
+:param fitness_scores: Find the best solution from the population
+:return: The best solution and its fitness score
+"""
     sorted_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)
     solution=population[sorted_indices[0]]
     best_f=fitness_scores[sorted_indices[0]]
 
     return solution,best_f
 def encode_txt(solution):
+    """
+The encode_txt function takes a solution as input and returns the decoded text.
+    The function first builds a substitution table using the initial permutation string and the solution.
+    Then, it uses this table to decode the cipher text.
+
+:param solution: Encode the text
+:return: The decoded text and the permutation dictionary
+"""
     initial_permutation_str = ''.join(INITIAL_PERMUTATION)
     # Build substitution table
     table = str.maketrans(initial_permutation_str, ''.join(solution))
@@ -343,7 +444,23 @@ def run_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_ge
     return False, sol, fitness, generations, avg_scores, bad_scores,best_scores,score_calls
 
 def graph_and_txt(sol, generations, avg_scores, bad_scores, best_scores, pop_size, crossover_rate, mutation_rate, max_generations,score_call):
-    # Create the text files containing the plaintext and permutation
+    """
+The graph_and_txt function takes in the solution, generations, average scores, bad scores, best scores and parameters
+    for the genetic algorithm. It then creates a plot of the average score distribution over time as well as a line plot
+    of the best score over time. The function also encodes and writes out both plaintext and permutation files.
+
+:param sol: Pass the solution to the function
+:param generations: Store the generation number for each score
+:param avg_scores: Plot the average scores over time
+:param bad_scores: Plot the bad scores as a red bar
+:param best_scores: Plot the best scores over time
+:param pop_size: Set the size of the population
+:param crossover_rate: Determine the probability of crossover
+:param mutation_rate: Determine the probability of a mutation occuring
+:param max_generations: Set the maximum number of generations to run for
+:param score_call: Count the number of times the fitness function is called
+:return: The plain text and the permutation dictionary
+"""
     plain, perm = encode_txt(sol)
     with open("plain.txt", "w") as file:
         file.write(plain)
@@ -384,6 +501,23 @@ def graph_and_txt(sol, generations, avg_scores, bad_scores, best_scores, pop_siz
 
 
 def run_genetic_algorithm_wrapper_to_check_conv(N=0,darwin=0,lamrk=0,checkparam=0,pop_size=0 ,crossover_rate=0, mutation_rate=0, max_generations=0):
+    """
+The run_genetic_algorithm_wrapper_to_check_conv function is a wrapper function that runs the genetic algorithm with different mutation rates and returns the best solution.
+    Args:
+        N (int): The number of queens to be placed on an NxN board. Default value is 0, which means it will ask for user input.
+        darwin (int): If 1, then run Darwinian Genetic Algorithm; if 0, then run regular GA or Lamarckian GA depending on lamrk parameter value. Default value is 0. 
+        lamrk (int): If 1, then run Lamarckian Genetic Algorithm; if 0, then
+
+:param N: Define the number of queens in the nxn board
+:param darwin: Determine whether the algorithm is darwinian or lamarkian
+:param lamrk: Determine if the algorithm is lamarkian or darwinian
+:param checkparam: Check if the function is being called from the wrapper or not
+:param pop_size: Set the population size
+:param crossover_rate: Determine the probability of crossover
+:param mutation_rate: Check the convergence of the algorithm for different mutation rates
+:param max_generations: Set the maximum number of generations that the algorithm will run for
+:return: The average, worst and best scores for the genetic algorithm
+"""
     if(checkparam==0):
         pop_size, crossover_rate, mutation_rate, max_generations,darwin,lamrk=get_params()
         window.destroy()
@@ -427,6 +561,18 @@ def run_genetic_algorithm_wrapper_to_check_conv(N=0,darwin=0,lamrk=0,checkparam=
 
 
 def local_optimum(candidate,old_fitness,N,darwin):
+    """
+The local_optimum function takes in a candidate, an old fitness score, the number of iterations to run through
+and whether or not we are using darwinian selection. It then runs through N iterations of mutating the candidate and 
+checking if it is better than the previous one. If it is better, then that becomes our new candidate and we continue 
+to iterate until N has been reached. If darwinian selection is on (darwin=True), then we return the original genom as well as its fitness score.
+
+:param candidate: Pass the current genom to the function
+:param old_fitness: Compare the fitness of the new genom with that of the old one
+:param N: Determine how many times the local_optimum function will run
+:param darwin: Determine if the function should return the original candidate or not
+:return: The best candidate and its fitness score
+"""
     if(darwin==1):
         original=candidate
     for n in range(N):
@@ -440,6 +586,23 @@ def local_optimum(candidate,old_fitness,N,darwin):
     return candidate,old_fitness
 
 def darwinian_or_lamark_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_generations,N,darwin=0,isfirst=0):
+    """
+The darwinian_or_lamark_genetic_algorithm function is a genetic algorithm that uses the darwinian or lamark selection method.
+    The function receives:
+        population_size - number of individuals in each generation (int)
+        crossover_rate - probability of crossover operation (float between 0 and 1)
+        mutation_rate - probability of mutation operation (float between 0 and 1)
+        max_generations - maximum number of generations to evolve for before returning best individual found so far(int). If this value is negative, then the GA will run until convergence.  Note that if you set this parameter to a large value, your GA may take
+
+:param population_size: Determine the size of the population
+:param crossover_rate: Determine the probability of a crossover operation being performed on two individuals
+:param mutation_rate: Determine the probability of mutation for each gene
+:param max_generations: Set the number of generations to run
+:param N: Determine the number of queens on the board
+:param darwin: Determine whether the algorithm is darwinian or lamark
+:param isfirst: Determine if the graph and txt files should be created
+:return: A tuple of the following values:
+"""
     global score_calls
     score_calls=0
     convergence=0
@@ -483,6 +646,14 @@ def darwinian_or_lamark_genetic_algorithm(population_size, crossover_rate, mutat
         graph_and_txt(sol,generations,avg_scores,bad_scores,best_scores,population_size,crossover_rate,mutation_rate,max_generations,score_calls)
     return False, sol, fitness, generations, avg_scores, bad_scores,best_scores,score_calls
 def compare():
+    """
+The compare function is used to compare the performance of different genetic algorithms.
+    The function takes no arguments and returns nothing. It simply plots the results of running
+    a regular genetic algorithm, a lamarkian genetic algorithm, and a darwinian genetic algorithm
+    on the same problem with identical parameters.
+
+:return: The best fitness scores, average fitness scores and the number of calls to score function
+"""
     N =[2,5,8,10,15,20]
     crossover_rate = 0.8
     mutation_rate = 0.1
@@ -517,6 +688,20 @@ def compare():
 
 
 def plot_results(param, best_fitness_scores, avg_scores, bad_scores, score_calls):
+    """
+The plot_results function takes in the parameters, best fitness scores, average fitness scores, worst
+fitness scores and number of score calls. It then plots these results on a 2x2 grid of subplots. The first
+subplot shows the best fitness score for each parameter value over time (i.e., generation). The second subplot
+shows the average fitness score for each parameter value over time (i.e., generation). The third subplot shows
+the worst fitness score for each parameter value over time (i.e., generation). Finally, the fourth plot shows a bar chart with one bar per run showing
+
+:param param: Set the title of the plots
+:param best_fitness_scores: Plot the best fitness scores for each run
+:param avg_scores: Store the average fitness scores for each generation
+:param bad_scores: Plot the worst fitness scores
+:param score_calls: Plot the number of score calls in a bar chart
+:return: A plot of the best, average and worst fitness scores
+"""
     fig, axs = plt.subplots(2, 2, figsize=(16, 12))
     axs = axs.flatten()
 
@@ -571,6 +756,13 @@ def plot_results(param, best_fitness_scores, avg_scores, bad_scores, score_calls
 
 def main():
     #compare()
+    """
+The main function is the entry point of the program.
+It creates a button that runs the genetic algorithm when clicked.
+
+
+:return: The best individual
+"""
     button = tk.Button(window, text="Run Genetic Algorithm",
                        command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
     button.pack()
