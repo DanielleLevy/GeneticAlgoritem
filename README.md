@@ -8,7 +8,7 @@ Files
 - dict.txt: A text file containing a list of English words. This is used to evaluate the fitness of the decrypted text.
 - Letter_Freq.txt: A text file containing the frequencies of individual English letters.
 - Letter2_Freq.txt: A text file containing the frequencies of letter pairs in English.
-
+THE FILES ARE ALREADY IN THE REPO , if you want to replace then after the clone make sure it will be the same names as above.
 ## Getting Started- Instructions
 Based Windows
 write the following in the treminal or powershell and press enter:
@@ -20,7 +20,7 @@ git clone https://github.com/DanielleLevy/GeneticAlgoritem.git
 write the following in the terminal or powershell , after each one press enter:
 
 1. cd GeneticAlgoritem
-2. Place the input files (enc.txt, dict.txt, Letter_Freq.txt, Letter2_Freq.txt) in the same directory as the genetic_algorithm.py script.
+2. if you want to replace the input files,Place them in the same directory as the genetic_algorithm.py script with the same names and delete the ones that came with the repo.
 2. ./main.exe
 
 ##### NOTE : if you run from the CMD you should write: 
