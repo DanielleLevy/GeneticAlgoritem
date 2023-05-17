@@ -11,6 +11,7 @@ CROSSOVER_RATE = 0.8
 MUTATION_RATE = 0.1
 MAX_GENERATIONS = 100
 score_calls = 0
+N=10
 
 
 # Load data
@@ -31,16 +32,24 @@ with open('Letter2_Freq.txt') as f:
         frequency, characters = line.split()
         ENGLISH_PAIR_FREQ[characters] = float(frequency)
 
+
 # Define representation
 ALPHABET = string.ascii_lowercase
 PERMUTATION_SIZE = len(ALPHABET)
 INITIAL_PERMUTATION = list(ALPHABET)
 random.shuffle(INITIAL_PERMUTATION)
 
+def update_checkboxes():
+    if darwinian_var.get() == 1:
+        lamarckian_checkbox.deselect()
+    if lamarckian_var.get() == 1:
+        darwinian_checkbox.deselect()
+
+
 # Create a window
 window = tk.Tk()
 window.title("Genetic Algorithm Parameters")
-window.geometry("300x200")
+window.geometry("300x250")
 
 # Create labels and entry widgets for each parameter
 pop_size_label = tk.Label(window, text="Population size:")
@@ -69,12 +78,13 @@ max_generations_entry.pack()
 
 # Create checkboxes for Darwinian and Lamarckian modes
 darwinian_var = tk.IntVar()
-darwinian_checkbox = tk.Checkbutton(window, text="Darwinian", variable=darwinian_var)
+darwinian_checkbox = tk.Checkbutton(window, text="Darwinian", variable=darwinian_var, command=update_checkboxes)
 darwinian_checkbox.pack()
 
 lamarckian_var = tk.IntVar()
-lamarckian_checkbox = tk.Checkbutton(window, text="Lamarckian", variable=lamarckian_var)
+lamarckian_checkbox = tk.Checkbutton(window, text="Lamarckian", variable=lamarckian_var, command=update_checkboxes)
 lamarckian_checkbox.pack()
+
 
 def input_check(population_size, crossover_rate, mutation_rate, max_generations):
     # check population_size
@@ -109,6 +119,8 @@ def get_params():
     crossover_rate = crossover_rate_entry.get()
     mutation_rate = mutation_rate_entry.get()
     max_generations = max_generations_entry.get()
+    darwinian_mode = darwinian_var.get()
+    lamarckian_mode = lamarckian_var.get()
     if input_check(pop_size,crossover_rate,mutation_rate,max_generations):
         pop_size = int(pop_size)
         crossover_rate = float(crossover_rate)
@@ -119,7 +131,7 @@ def get_params():
         crossover_rate = CROSSOVER_RATE
         mutation_rate = MUTATION_RATE
         max_generations=MAX_GENERATIONS
-    return pop_size,crossover_rate,mutation_rate,max_generations
+    return pop_size,crossover_rate,mutation_rate,max_generations,darwinian_mode,lamarckian_mode
 
 
 def generate_initial_population(size):
@@ -371,14 +383,17 @@ def graph_and_txt(sol, generations, avg_scores, bad_scores, best_scores, pop_siz
     plt.show()
 
 
-def run_genetic_algorithm_wrapper_to_check_conv(N=0,darwin=0,checkparam=0,pop_size=0 ,crossover_rate=0, mutation_rate=0, max_generations=0):
+def run_genetic_algorithm_wrapper_to_check_conv(N=0,darwin=0,lamrk=0,checkparam=0,pop_size=0 ,crossover_rate=0, mutation_rate=0, max_generations=0):
     if(checkparam==0):
-        pop_size, crossover_rate, mutation_rate, max_generations=get_params()
+        pop_size, crossover_rate, mutation_rate, max_generations,darwin,lamrk=get_params()
         window.destroy()
-    if(N==0):
-         flag, sol, fitness, generations, avg_scores, worst_score ,best_scores,score_call= run_genetic_algorithm(pop_size, crossover_rate, mutation_rate, max_generations,1)
+    if(darwin==1 or lamrk==1):
+        flag, sol, fitness, generations, avg_scores, worst_score, best_scores, score_call = darwinian_or_lamark_genetic_algorithm(
+            pop_size, crossover_rate, mutation_rate, max_generations, N, darwin, 1)
     else:
-        flag, sol, fitness, generations, avg_scores, worst_score ,best_scores,score_call= darwinian_or_lamark_genetic_algorithm(pop_size, crossover_rate, mutation_rate, max_generations,N,darwin,1)
+        flag, sol, fitness, generations, avg_scores, worst_score, best_scores, score_call = run_genetic_algorithm(
+            pop_size, crossover_rate, mutation_rate, max_generations, 1)
+
     best_fitness_scores=[]
     solutions=[]
     generations_conv=[]
@@ -398,12 +413,12 @@ def run_genetic_algorithm_wrapper_to_check_conv(N=0,darwin=0,checkparam=0,pop_si
             mutation_rates.append(mutation_rate)
             score_calls_conv.append(score_call)
             mutation_rate=random.uniform(mutation_rate, 1)
-            if (N == 0):
-                flag, sol, fitness, generations, avg_scores, worst_score, best_scores, score_call = run_genetic_algorithm(
-                    pop_size, crossover_rate, mutation_rate, max_generations, 0)
-            else:
+            if (darwin == 1 or lamrk == 1):
                 flag, sol, fitness, generations, avg_scores, worst_score, best_scores, score_call = darwinian_or_lamark_genetic_algorithm(
                     pop_size, crossover_rate, mutation_rate, max_generations, N, darwin, 0)
+            else:
+                flag, sol, fitness, generations, avg_scores, worst_score, best_scores, score_call = run_genetic_algorithm(
+                    pop_size, crossover_rate, mutation_rate, max_generations, 0)
 
         max_index = best_fitness_scores.index(max(best_fitness_scores))
         graph_and_txt(solutions[max_index],generations_conv[max_index],avg_scores_conv[max_index],bad_scores[max_index],best_scores_conv[max_index],pop_size,crossover_rate,mutation_rates[max_index],generations_conv[max_index][-1],score_calls_conv[max_index])
@@ -478,14 +493,14 @@ def compare():
     bad_scores = []
     score_calls = []
     tags=['regular','lamrak','darwin']
-    avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(0,0,1, pop_size, crossover_rate, mutation_rate,
+    avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(0,0,0,1, pop_size, crossover_rate, mutation_rate,
                                                                              max_gen)
     best_fitness_scores.append(best)
     avg_scores.append(avg)
     bad_scores.append(bad)
     score_calls.append(score_call)
     for i in range(2):
-        avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(10,i,1, pop_size, crossover_rate,
+        avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(10,i,1-i,1, pop_size, crossover_rate,
                                                                                  mutation_rate,
                                                                                  max_gen)
         best_fitness_scores.append(best)
@@ -555,11 +570,11 @@ def plot_results(crossover_param, best_fitness_scores, avg_scores, bad_scores, s
 
 
 def main():
-    compare()
-    #button = tk.Button(window, text="Run Genetic Algorithm",
-                       #command=lambda: run_genetic_algorithm_wrapper_to_check_conv(20,1))
-    #button.pack()
-    #window.mainloop()
+    #compare()
+    button = tk.Button(window, text="Run Genetic Algorithm",
+                       command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
+    button.pack()
+    window.mainloop()
 
 
 
