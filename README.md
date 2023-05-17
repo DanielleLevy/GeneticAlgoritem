@@ -9,15 +9,35 @@ Files
 - Letter_Freq.txt: A text file containing the frequencies of individual English letters.
 - Letter2_Freq.txt: A text file containing the frequencies of letter pairs in English.
 
-## Usage
-Make sure you have Python 3.x and the required libraries installed.
-Place the input files (enc.txt, dict.txt, Letter_Freq.txt, Letter2_Freq.txt) in the same directory as the genetic_algorithm.py script.
-Run the genetic_algorithm.py script using Python.
+## Getting Started- Instructions
+Based Windows
+write the following in the treminal or powershell and press enter:
+
+git clone https://github.com/DanielleLevy/GeneticAlgoritem.git
+### 2 Ways to run:
+#### first way:
+
+write the following in the terminal or powershell , after each one press enter:
+
+1. cd GeneticAlgoritem
+2. Place the input files (enc.txt, dict.txt, Letter_Freq.txt, Letter2_Freq.txt) in the same directory as the genetic_algorithm.py script.
+2. ./main.exe
+
+##### NOTE : if you run from the CMD you should write: 
+
+1. cd GeneticAlgoritem
+
+2. main.exe
+
+
+#### second way:
+Go to the folder where the Repo file is located and double-click on the EXE file.
+
+
+
 A GUI window will appear, allowing you to modify the parameters of the genetic algorithm (population size, crossover rate, mutation rate, and max generations). You can also select between Darwinian and Lamarckian modes. If you leave any parameter blank or provide invalid input, default values will be used.
 Click the "Run Algorithm" button to start the genetic algorithm.
 The algorithm will run for the specified number of generations or until convergence is reached (10 generations with no improvement in the average score).
-The algorithm will output the decrypted plaintext, the best permutation, and generate a plot (plot.png) showing the average, bad, and best scores over generations. The decrypted plaintext will be saved in plain.txt, and the permutation will be saved in perm.txt.
-You can check the convergence and the number of fitness function calls in the console output.
 
 ## Output
 1. Graph (plot.png): The code generates a graph that displays the average, best, and worst fitness scores for each generation. This graph provides a visual representation of the fitness scores over the course of the evolutionary process. Additionally, the graph includes the parameters used for the run and the number of function calls. The graph is saved in the code directory upon completion of the execution under the name "plot.png."
