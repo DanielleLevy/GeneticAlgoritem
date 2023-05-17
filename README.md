@@ -3,16 +3,11 @@ This code implements a genetic algorithm for cryptanalysis, specifically for bre
 
 
 ## Requirements
-Python 3.x
-matplotlib library
-numpy library
-tkinter library (usually comes pre-installed with Python)
 Files
-genetic_algorithm.py: The main Python script that contains the implementation of the genetic algorithm.
-enc.txt: The input cipher text that needs to be decrypted.
-dict.txt: A text file containing a list of English words. This is used to evaluate the fitness of the decrypted text.
-Letter_Freq.txt: A text file containing the frequencies of individual English letters.
-Letter2_Freq.txt: A text file containing the frequencies of letter pairs in English.
+- enc.txt: The input cipher text that needs to be decrypted.
+- dict.txt: A text file containing a list of English words. This is used to evaluate the fitness of the decrypted text.
+- Letter_Freq.txt: A text file containing the frequencies of individual English letters.
+- Letter2_Freq.txt: A text file containing the frequencies of letter pairs in English.
 
 ## Usage
 Make sure you have Python 3.x and the required libraries installed.
