@@ -176,6 +176,14 @@ is equal to size and each inner list has length len(INITIAL_PERMUTATION). Each e
     return population
 
 def fitness_score(candidate):
+    """
+The fitness_score function takes a candidate solution and returns its fitness score.
+The fitness score is the sum of the log-probabilities of English letter and letter pair frequencies in decoded text,
+plus a bonus for each English word in decoded text. The higher the fitness score, the better.
+
+:param candidate: Pass the candidate solution to the fitness_score function
+:return: A score that is the sum of two components:
+"""
     global score_calls
     score_calls += 1
     # Convert INITIAL_PERMUTATION to a string before using it in str.maketrans()
@@ -412,6 +420,20 @@ The encode_txt function takes a solution as input and returns the decoded text.
     sorted_perm_dict = dict(sorted(perm_dict.items()))
     return decoded_text,sorted_perm_dict
 def run_genetic_algorithm(population_size, crossover_rate, mutation_rate, max_generations,isfirst=0):
+    """
+The run_genetic_algorithm function runs the genetic algorithm.
+    Args:
+        population_size (int): The number of individuals in each generation.
+        crossover_rate (float): The probability that two parents will mate and produce an offspring, which receives traits from each parent. Must be between 0 and 1, where 0 represents a 0% chance of crossover taking place and 1 represents a 100% chance of crossover taking place. Note that you can use Python's built-in round function to round this value to the nearest hundredth (e.g., round(0.654, 2)) if necessary for printing or comparison purposes).
+
+
+:param population_size: Determine the size of the population
+:param crossover_rate: Determine the probability of crossover
+:param mutation_rate: Determine the probability of a mutation occuring
+:param max_generations: Determine how many times the algorithm will run
+:param isfirst: Check if this is the first time we run the algorithm
+:return: A tuple containing:
+"""
     global score_calls
     score_calls=0
     convergence=0
