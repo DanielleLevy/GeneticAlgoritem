@@ -782,7 +782,7 @@ the worst fitness score for each parameter value over time (i.e., generation). F
 
 def main():
 
-    compare()
+    #compare()
     """
 The main function is the entry point of the program.
 It creates a button that runs the genetic algorithm when clicked.
@@ -790,10 +790,10 @@ It creates a button that runs the genetic algorithm when clicked.
 
 :return: The best individual
 """
-    #button = tk.Button(window, text="Run Genetic Algorithm",
-                       #command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
-    #button.pack()
-    #window.mainloop()
+    button = tk.Button(window, text="Run Genetic Algorithm",
+                       command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
+    button.pack()
+    window.mainloop()
 
 
 
