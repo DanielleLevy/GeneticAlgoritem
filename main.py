@@ -176,13 +176,6 @@ is equal to size and each inner list has length len(INITIAL_PERMUTATION). Each e
     return population
 
 def fitness_score(candidate):
-    """
-The fitness_score function takes a candidate solution and returns its fitness score.
-The fitness score is the number of English words in the decoded text, plus half a point for each letter or letter pair that has an English frequency within 0.01 of its true value.
-
-:param candidate: Pass the candidate permutation to the fitness_score function
-:return: The number of english words in the decoded text
-"""
     global score_calls
     score_calls += 1
     # Convert INITIAL_PERMUTATION to a string before using it in str.maketrans()
@@ -208,6 +201,15 @@ The fitness score is the number of English words in the decoded text, plus half 
 
     # Compute log-probabilities of English letter and letter pair frequencies in decoded text
     score = 0
+    total_letters = sum(letter_freq.values())
+    total_pairs = sum(pair_freq.values())
+
+    for letter, freq in letter_freq.items():
+        letter_freq[letter]=letter_freq.get(letter)/total_letters
+
+    for pair, freq in pair_freq.items():
+        pair_freq[pair]=pair_freq.get(pair)/total_pairs
+
     for letter, freq in letter_freq.items():
         true_freq = ENGLISH_LETTER_FREQ.get(letter.upper())
         if (freq <= true_freq + 0.01) & (freq >= true_freq - 0.01):
@@ -658,36 +660,38 @@ The compare function is used to compare the performance of different genetic alg
     crossover_rate = 0.8
     mutation_rate = 0.1
     pop_size = 100
-    max_gen=100
+    max_gen=[50,80,100,150,200,250]
     best_fitness_scores = []
     avg_scores = []
     bad_scores = []
     score_calls = []
-    tags=['regular','lamrak','darwin']
-    avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(0,0,0,1, pop_size, crossover_rate, mutation_rate,
-                                                                             max_gen)
-    best_fitness_scores.append(best)
-    avg_scores.append(avg)
-    bad_scores.append(bad)
-    score_calls.append(score_call)
-    for i in range(2):
-        avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(10,i,1-i,1, pop_size, crossover_rate,
-                                                                                 mutation_rate,
-                                                                                 max_gen)
+    #tags=['regular','lamrak','darwin']
+    #avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(0,0,0,1, pop_size, crossover_rate, mutation_rate,
+                                                                             #max_gen)
+    #best_fitness_scores.append(best)
+    #avg_scores.append(avg)
+    #bad_scores.append(bad)
+    #score_calls.append(score_call)
+    #for i in range(2):
+        #avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(10,i,1-i,1, pop_size, crossover_rate,
+                                                                                # mutation_rate,
+                                                                                 #max_gen)
+        #best_fitness_scores.append(best)
+        #avg_scores.append(avg)
+        #bad_scores.append(bad)
+        #score_calls.append(score_call)
+    for i, param in enumerate(max_gen):
+        #avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(param,0,1,1 ,pop_size, crossover_rate, mutation_rate,max_gen)
+        avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(0,0,0,1 ,pop_size, crossover_rate, mutation_rate,param)
+
         best_fitness_scores.append(best)
         avg_scores.append(avg)
         bad_scores.append(bad)
         score_calls.append(score_call)
-    #for i, param in enumerate(N):
-       # avg, bad, best, score_call = run_genetic_algorithm_wrapper_to_check_conv(20,1,1 ,pop_size, crossover_rate, mutation_rate,max_gen)
-       # best_fitness_scores.append(best)
-      #  avg_scores.append(avg)
-      #  bad_scores.append(bad)
-      #  score_calls.append(score_call)
-    plot_results(tags, best_fitness_scores, avg_scores, bad_scores, score_calls)
+    plot_results(max_gen, best_fitness_scores, avg_scores, bad_scores, score_calls)
 
 
-def plot_results(param, best_fitness_scores, avg_scores, bad_scores, score_calls):
+def plot_results(params, best_fitness_scores, avg_scores, bad_scores, score_calls):
     """
 The plot_results function takes in the parameters, best fitness scores, average fitness scores, worst
 fitness scores and number of score calls. It then plots these results on a 2x2 grid of subplots. The first
@@ -710,8 +714,8 @@ the worst fitness score for each parameter value over time (i.e., generation). F
 
     # Plot best fitness scores
     ax = axs[0]
-    for i, param in enumerate(param):
-        line, = ax.plot(best_fitness_scores[i], label=f' {param}', color=colors[i])
+    for i, param in enumerate(params):
+        line, = ax.plot(best_fitness_scores[i], label=f'max_gen:{param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Best fitness score')
@@ -719,8 +723,8 @@ the worst fitness score for each parameter value over time (i.e., generation). F
 
     # Plot average fitness scores
     ax = axs[1]
-    for i, param in enumerate(param):
-        line, = ax.plot(avg_scores[i], label=f' {param}', color=colors[i])
+    for i, param in enumerate(params):
+        line, = ax.plot(avg_scores[i], label=f'max_gen: {param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Average fitness score')
@@ -728,8 +732,8 @@ the worst fitness score for each parameter value over time (i.e., generation). F
 
     # Plot worst fitness scores
     ax = axs[2]
-    for i, param in enumerate(param):
-        line, = ax.plot(bad_scores[i], label=f'{param}', color=colors[i])
+    for i, param in enumerate(params):
+        line, = ax.plot(bad_scores[i], label=f'max_gen:{param}', color=colors[i])
         handles.append(line)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Worst fitness score')
@@ -746,7 +750,7 @@ the worst fitness score for each parameter value over time (i.e., generation). F
     ax.set_ylabel('Number of score calls')
     ax.set_title('Number of score calls')
 
-    fig.legend(handles=handles, labels=[f' {param}' for param in param], loc='center left')
+    fig.legend(handles=handles, labels=[f' max_gen:{param}' for param in params], loc='center left')
 
     plt.subplots_adjust(left=0.2, wspace=0.3, hspace=0.4)
     plt.tight_layout()
@@ -755,7 +759,8 @@ the worst fitness score for each parameter value over time (i.e., generation). F
 
 
 def main():
-    #compare()
+
+    compare()
     """
 The main function is the entry point of the program.
 It creates a button that runs the genetic algorithm when clicked.
@@ -763,10 +768,10 @@ It creates a button that runs the genetic algorithm when clicked.
 
 :return: The best individual
 """
-    button = tk.Button(window, text="Run Genetic Algorithm",
-                       command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
-    button.pack()
-    window.mainloop()
+    #button = tk.Button(window, text="Run Genetic Algorithm",
+                       #command=lambda: run_genetic_algorithm_wrapper_to_check_conv(N))
+    #button.pack()
+    #window.mainloop()
 
 
 
