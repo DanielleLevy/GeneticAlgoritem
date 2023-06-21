@@ -64,7 +64,6 @@ runnet.py: This module implements the functionality for running the trained neur
 
 main.py: This module contains the core functions used by buildnet.py and runnet.py. It includes functions for loading the input data, scoring the fitness of candidate networks, implementing the evolution operators, and executing the genetic algorithm.
 
-The code expects two input data files, namely nn0.txt and nn1.txt, which contain binary strings along with their corresponding legality labels (0 or 1). nn0.txt is designed to be easier to identify legality patterns, while nn1.txt is more challenging.
 
 During the building process, the genetic algorithm evolves a population of neural networks by iteratively selecting parents, performing crossover and mutation, and evaluating their fitness based on how well they predict the legality of the binary strings. The process continues until a satisfactory network structure and weights are obtained, which are saved in the wnet.txt file.
 
