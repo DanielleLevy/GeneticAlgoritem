@@ -46,30 +46,7 @@ The algorithm will run for the specified number of generations or until converge
 
 3. Permutation table file (perm.txt): Another file named "perm.txt" is created in the code directory. This file contains the permutation table, which is a table that indicates the substitutions made during the execution of the code. It provides information about the changes or replacements that occurred during the execution process.
 
-## Background
-The Neural Network Pattern Learning project aims to develop a system that can identify patterns in binary strings using neural networks. The goal is to create neural networks capable of predicting the legality of binary strings based on patterns learned from training data.
 
-Neural networks are computational models inspired by the structure and function of the human brain. They are composed of interconnected nodes, called neurons, organized into layers. Each neuron receives input signals, processes them, and produces an output signal that can be passed to other neurons. Neural networks have the ability to learn and generalize from input-output patterns, making them suitable for pattern recognition tasks.
-
-In this project, a genetic algorithm-based approach is employed to build the neural networks. Genetic algorithms are optimization algorithms inspired by the process of natural selection and evolution. They work by iteratively generating a population of candidate solutions, evaluating their fitness, and using genetic operators (such as selection, crossover, and mutation) to evolve better solutions over generations.
-
-## Code Explanation
-The code consists of several modules and files that work together to implement the pattern learning system using neural networks. Here's an overview of the key components:
-
-gui.py: This module provides a graphical user interface (GUI) for the user to interact with the system. It allows the user to choose options, input files, and run the building and running processes.
-
-buildnet.py: This module contains the implementation of the genetic algorithm-based network building process. It defines the procedures for initializing the population, evaluating fitness, selecting parents, applying crossover and mutation, and generating the final network structure and weights.
-
-runnet.py: This module implements the functionality for running the trained neural network on new data for classification. It takes the network structure and weights obtained from the building process and applies them to make predictions on test data.
-
-main.py: This module contains the core functions used by buildnet.py and runnet.py. It includes functions for loading the input data, scoring the fitness of candidate networks, implementing the evolution operators, and executing the genetic algorithm.
-
-
-During the building process, the genetic algorithm evolves a population of neural networks by iteratively selecting parents, performing crossover and mutation, and evaluating their fitness based on how well they predict the legality of the binary strings. The process continues until a satisfactory network structure and weights are obtained, which are saved in the wnet.txt file.
-
-The runnet process utilizes the trained network structure and weights from wnet.txt to classify new binary strings and produce an output file with the classification results.
-
-It is important to evaluate the performance of the trained neural networks on both the learning group (training data) and the test group. The accuracy of the networks in predicting the legality of binary strings can be used as a measure of performance.
 ## Notes
 The genetic algorithm uses a fitness function to evaluate the quality of each candidate solution. The fitness function computes the log-probabilities of English letter and letter pair frequencies in the decrypted text, and also adds a bonus for each English word found.
 The genetic_algorithm.py script includes the necessary functions to perform selection, crossover, mutation, and fitness scoring. You can modify these functions or experiment with different variations of the genetic algorithm as needed.
